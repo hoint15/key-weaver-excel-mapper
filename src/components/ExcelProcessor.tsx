@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,16 +96,22 @@ const ExcelProcessor = () => {
       // Parse mapping file
       const mappingData = await parseMappingFile(mappingFile);
 
-      // Process data with mapping
+      console.log('Mapping data:', mappingData);
+
+      // Process data with mapping - only replace values that exist in mapping
       const processed = sourceData.map(row => {
         const newRow: ProcessedData = { ...row };
 
         Object.keys(row).forEach(column => {
-          if (mappingData[column] && row[column]) {
-            const mappedValue = mappingData[column][row[column] as string];
-            if (mappedValue) {
-              newRow[column] = mappedValue;
+          // Check if there's a mapping sheet for this column
+          if (mappingData[column] && row[column] !== null && row[column] !== undefined) {
+            const currentValue = row[column] as string;
+            // Only replace if the exact value exists in the mapping
+            if (mappingData[column][currentValue]) {
+              newRow[column] = mappingData[column][currentValue];
+              console.log(`Mapped ${column}: ${currentValue} -> ${mappingData[column][currentValue]}`);
             }
+            // If no mapping found, keep the original value
           }
         });
 
