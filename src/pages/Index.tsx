@@ -1,11 +1,12 @@
-/* =====================================
-   PLACE THESE FILES EXACTLY AS NAMED
-   ├─ components/ExcelProcessor.tsx
-   ├─ utils/date.ts
-   └─ pages/index.tsx
-   ===================================== */
+Below are **three separate files**. **Create each file exactly as named** in your project’s `src` folder (or adjust paths if you don’t use `src/`).  
 
-/* ================= utils/date.ts ================= */
+> **Do NOT copy them all into a single file.**  
+> Each file contains a *single* `export default` or named export to avoid duplicate‑symbol errors.
+
+---
+
+## 1. `utils/date.ts`
+```ts
 export const buildDob = (
   year?: number | string,
   month?: number | string,
@@ -16,12 +17,16 @@ export const buildDob = (
   const dd = String(day).padStart(2, '0');
   return `${year}-${mm}-${dd}`;
 };
+```
 
-/* ============== components/ExcelProcessor.tsx ============== */
+---
+
+## 2. `components/ExcelProcessor.tsx`
+```tsx
 import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { buildDob } from '../utils/date'; // 🠕 đường dẫn tương đối
+import { buildDob } from '../utils/date';
 
 type RowData = Record<string, any>;
 
@@ -58,8 +63,8 @@ const ExcelProcessor = () => {
       fileToWorkbook(mappingFile),
     ]);
 
-    const firstSheetName = srcWb.SheetNames[0];
-    const srcRows = XLSX.utils.sheet_to_json<RowData>(srcWb.Sheets[firstSheetName], { defval: '' });
+    const sheetName = srcWb.SheetNames[0];
+    const srcRows = XLSX.utils.sheet_to_json<RowData>(srcWb.Sheets[sheetName], { defval: '' });
 
     const mappingDict = buildMappings(mapWb);
 
@@ -90,7 +95,7 @@ const ExcelProcessor = () => {
 
     setPreviewRows(processedRows.slice(0, 50));
 
-    // ✅ Export
+    // Export
     const ws = XLSX.utils.json_to_sheet(processedRows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Processed');
@@ -101,48 +106,27 @@ const ExcelProcessor = () => {
   /* ---------- UI ---------- */
   return (
     <div className="space-y-4">
-      {/* Uploads & button */}
       <div className="flex flex-col md:flex-row gap-4">
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={(e) => setSourceFile(e.target.files?.[0] ?? null)}
-          className="file:py-2 file:px-4 file:bg-indigo-600 file:text-white file:rounded hover:file:bg-indigo-700"
-        />
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={(e) => setMappingFile(e.target.files?.[0] ?? null)}
-          className="file:py-2 file:px-4 file:bg-indigo-600 file:text-white file:rounded hover:file:bg-indigo-700"
-        />
-        <button
-          onClick={handleProcess}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg w-full md:w-auto"
-        >
-          Xử lý dữ liệu
-        </button>
+        <input type="file" accept=".xlsx,.xls" onChange={(e) => setSourceFile(e.target.files?.[0] ?? null)} />
+        <input type="file" accept=".xlsx,.xls" onChange={(e) => setMappingFile(e.target.files?.[0] ?? null)} />
+        <button onClick={handleProcess} className="bg-green-600 text-white px-4 py-2 rounded">Xử lý dữ liệu</button>
       </div>
 
-      {/* preview table */}
       {previewRows.length > 0 && (
         <div className="overflow-x-auto max-h-96 border rounded-lg">
           <table className="min-w-full text-sm text-left">
             <thead className="bg-gray-50 sticky top-0">
               <tr>
                 {Object.keys(previewRows[0]).map((key) => (
-                  <th key={key} className="px-3 py-2 font-semibold border-b whitespace-nowrap">
-                    {key}
-                  </th>
+                  <th key={key} className="px-3 py-2 font-semibold border-b whitespace-nowrap">{key}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {previewRows.map((row, idx) => (
                 <tr key={idx} className="odd:bg-white even:bg-gray-50">
-                  {Object.values(row).map((val, i) => (
-                    <td key={i} className="px-3 py-1 border-b whitespace-nowrap">
-                      {String(val)}
-                    </td>
+                  {Object.values<RowData[keyof RowData]>(row).map((val, i) => (
+                    <td key={i} className="px-3 py-1 border-b whitespace-nowrap">{String(val)}</td>
                   ))}
                 </tr>
               ))}
@@ -155,9 +139,13 @@ const ExcelProcessor = () => {
 };
 
 export default ExcelProcessor;
+```
 
-/* ====================== pages/index.tsx ====================== */
-import ExcelProcessor from '../components/ExcelProcessor'; // 🠕 đường dẫn tương đối
+---
+
+## 3. `pages/index.tsx`
+```tsx
+import ExcelProcessor from '../components/ExcelProcessor';
 
 const Index = () => (
   <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -165,8 +153,7 @@ const Index = () => (
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Excel Data Processor</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Upload your source Excel file and mapping file.<br />
-          Hệ thống sẽ tự thêm <code>dob</code> &amp; <code>attendant_template_id</code>.
+          Upload your source Excel file and mapping file. System will auto‑generate <code>dob</code> &amp; <code>attendant_template_id</code>.
         </p>
       </div>
       <div className="bg-white rounded-lg shadow-xl p-6">
@@ -177,3 +164,14 @@ const Index = () => (
 );
 
 export default Index;
+```
+
+---
+
+### ⚠️ Lỗi trên Vercel vẫn xảy ra?
+
+1. Xoá hẳn **các file cũ** (đặc biệt `src/pages/Index.tsx` trộn lẫn code).  
+2. Tạo lại *ba* file trên đúng đường dẫn.  
+3. Chạy `npm run build`/`vercel --prod`.
+
+Bạn chỉ cần cho mình biết nếu log vẫn báo trùng `buildDob` hoặc `ExcelProcessor`. Khi đó 99 % là còn một file khác (hoặc đoạn code copy‑paste) khai báo lại những symbol đó. Hãy tìm và xoá đoạn thừa.
